@@ -23,11 +23,29 @@
     tela("painel"); carregar();
   }
 
+  var criando = false;
+  $("alternar").addEventListener("click", function (e) {
+    e.preventDefault(); criando = !criando; $("erro-login").textContent = "";
+    $("bt-login").textContent = criando ? "Criar minha senha" : "Entrar";
+    this.textContent = criando ? "Já tenho senha: entrar" : "Primeiro acesso? Criar minha senha";
+    $("l-senha").setAttribute("autocomplete", criando ? "new-password" : "current-password");
+  });
   $("f-login").addEventListener("submit", async function (e) {
     e.preventDefault(); $("erro-login").textContent = "";
-    var r = await sb.auth.signInWithPassword({ email: $("l-email").value.trim(), password: $("l-senha").value });
+    var email = $("l-email").value.trim(), senha = $("l-senha").value;
+    if (criando) {
+      if (senha.length < 10) { $("erro-login").textContent = "Use uma senha com pelo menos 10 caracteres."; return; }
+      var c = await sb.auth.signUp({ email: email, password: senha });
+      $("l-senha").value = "";
+      if (c.error) { $("erro-login").textContent = "Não foi possível criar: " + c.error.message; return; }
+      if (c.data && c.data.session) return iniciar();
+      $("erro-login").style.color = "var(--ok)";
+      $("erro-login").textContent = "Senha criada! Agora peça a liberação do acesso e depois entre com o mesmo e-mail e senha.";
+      $("alternar").click(); return;
+    }
+    var r = await sb.auth.signInWithPassword({ email: email, password: senha });
     $("l-senha").value = "";
-    if (r.error) { $("erro-login").textContent = "E-mail ou senha incorretos."; return; }
+    if (r.error) { $("erro-login").style.color = ""; $("erro-login").textContent = /confirm/i.test(r.error.message) ? "Seu acesso ainda não foi liberado." : "E-mail ou senha incorretos."; return; }
     iniciar();
   });
   $("sair").addEventListener("click", async function () { await sb.auth.signOut(); tela("login"); });

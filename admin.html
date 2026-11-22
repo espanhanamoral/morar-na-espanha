@@ -63,11 +63,12 @@
     <form id="f-login">
       <div class="campo"><label for="l-email">E-mail</label><input type="email" id="l-email" autocomplete="username" required></div>
       <div class="campo"><label for="l-senha">Senha</label><input type="password" id="l-senha" autocomplete="current-password" required style="width:100%; min-height:54px; padding:12px 14px; font:17px var(--f); border:2px solid var(--borda); border-radius:10px; background:var(--creme)"></div>
-      <button class="btn" type="submit">Entrar</button>
+      <button class="btn" type="submit" id="bt-login">Entrar</button>
       <div id="erro-login" role="alert"></div>
+      <p class="nota" style="text-align:center"><a href="#" id="alternar">Primeiro acesso? Criar minha senha</a></p>
     </form>
   </div>
-  <p class="nota">O acesso usa o login do Supabase (Authentication). A senha é criada por você diretamente no Supabase.</p>
+  <p class="nota">Só o e-mail autorizado como administrador vê os dados. A senha é criada por você nesta página e não é enviada a ninguém.</p>
 </div>
 
 <div id="tela-painel" class="pn" style="display:none">
