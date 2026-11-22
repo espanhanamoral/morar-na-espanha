@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel — eBook Morar na Espanha</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  body { background: #F4EFE9; font-size: 15px; }
+  .pn { width: min(1200px, 100% - 28px); margin: 22px auto 60px; }
+  .login { max-width: 400px; margin: 60px auto; }
+  .login .cartao { margin-top: 18px; }
+  h1.pt { font: 800 italic 28px var(--t); color: var(--preto); margin: 8px 0 4px; }
+  .barra { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 10px 0 18px; }
+  .seg { display: inline-flex; background: #fff; border-radius: 10px; box-shadow: 0 0 0 1px var(--borda); overflow: hidden; }
+  .seg button { border: 0; background: none; padding: 10px 14px; font: 600 14px var(--f); cursor: pointer; color: var(--texto); }
+  .seg button.on { background: var(--preto); color: #fff; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .kpi { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 0 0 1px var(--borda); }
+  .kpi .n { font: 800 32px var(--t); color: var(--preto); line-height: 1.1; margin: 4px 0; }
+  .kpi .l { font: 700 12px var(--f); letter-spacing: .08em; text-transform: uppercase; color: var(--cinza); }
+  .kpi .d { font-size: 13px; color: var(--cinza); }
+  .kpi.destaque { background: var(--preto); } .kpi.destaque .n { color: var(--amarelo); } .kpi.destaque .l, .kpi.destaque .d { color: rgba(255,255,255,.7); }
+  .grade2 { display: grid; gap: 14px; margin-top: 14px; }
+  @media (min-width: 900px) { .grade2 { grid-template-columns: 1.6fr 1fr; } }
+  .painel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 0 0 1px var(--borda); }
+  .painel h3 { font: 800 16px var(--t); color: var(--preto); margin-bottom: 12px; }
+  .legenda { display: flex; gap: 14px; font-size: 13px; color: var(--cinza); margin-bottom: 8px; flex-wrap: wrap; }
+  .legenda i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+  svg.graf { width: 100%; height: 220px; display: block; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.t th { text-align: left; font: 700 12px var(--f); letter-spacing: .06em; text-transform: uppercase; color: var(--cinza); padding: 8px 8px; border-bottom: 2px solid var(--borda); white-space: nowrap; }
+  table.t td { padding: 10px 8px; border-bottom: 1px solid #EFE7DD; vertical-align: top; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .tag.sim { background: #E4F3E8; color: var(--ok); } .tag.nao { background: #F1ECE6; color: var(--cinza); }
+  .filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .filtros input[type=search] { min-height: 42px; padding: 8px 12px; border: 2px solid var(--borda); border-radius: 10px; font: 15px var(--f); min-width: 220px; flex: 1; }
+  .filtros label { display: flex; gap: 8px; align-items: center; font-weight: 600; cursor: pointer; }
+  .filtros input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--vermelho); }
+  .bt { border: 0; border-radius: 9px; padding: 10px 14px; font: 700 14px var(--f); cursor: pointer; background: var(--preto); color: #fff; }
+  .bt.claro { background: #fff; color: var(--preto); box-shadow: 0 0 0 1px var(--borda); }
+  .bt.mini { padding: 5px 9px; font-size: 12px; }
+  .bt.perigo { background: var(--vermelho); }
+  .rolagem { overflow-x: auto; }
+  .nota { font-size: 13px; color: var(--cinza); margin-top: 10px; line-height: 1.5; }
+  .aviso-cfg { background: #FFF4D6; border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+  .modal { position: fixed; inset: 0; background: rgba(16,15,18,.55); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 20; }
+  .modal.on { display: flex; }
+  .modal .cx { background: #fff; border-radius: 14px; padding: 22px; max-width: 420px; }
+  .modal .cx p { margin: 8px 0 16px; }
+  #erro-login { color: var(--vermelho); font-size: 14px; margin-top: 10px; min-height: 18px; }
+</style>
+<script src="config.js"></script>
+<script src="assets/supabase.js"></script>
+</head>
+<body>
+
+<div id="tela-login" class="login" style="display:none">
+  <span class="rotulo">Área restrita</span>
+  <h1 class="pt">Painel do eBook</h1>
+  <div class="cartao" style="box-shadow:0 0 0 1px var(--borda)">
+    <form id="f-login">
+      <div class="campo"><label for="l-email">E-mail</label><input type="email" id="l-email" autocomplete="username" required></div>
+      <div class="campo"><label for="l-senha">Senha</label><input type="password" id="l-senha" autocomplete="current-password" required style="width:100%; min-height:54px; padding:12px 14px; font:17px var(--f); border:2px solid var(--borda); border-radius:10px; background:var(--creme)"></div>
+      <button class="btn" type="submit">Entrar</button>
+      <div id="erro-login" role="alert"></div>
+    </form>
+  </div>
+  <p class="nota">O acesso usa o login do Supabase (Authentication). A senha é criada por você diretamente no Supabase.</p>
+</div>
+
+<div id="tela-painel" class="pn" style="display:none">
+  <div class="barra">
+    <div><span class="rotulo">Espanha na Moral</span><h1 class="pt">Painel · eBook Morar na Espanha</h1></div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <div class="seg" id="periodo"><button data-d="7">7 dias</button><button data-d="30" class="on">30 dias</button><button data-d="0">Tudo</button></div>
+      <button class="bt claro" id="atualizar">Atualizar</button>
+      <button class="bt claro" id="sair">Sair</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">Visitas à página</div><div class="n" id="k-visitas">–</div><div class="d">Aberturas da página (anônimas)</div></div>
+    <div class="kpi destaque"><div class="l">Cadastros</div><div class="n" id="k-cadastros">–</div><div class="d">Pessoas únicas (por e-mail)</div></div>
+    <div class="kpi"><div class="l">Conversão</div><div class="n" id="k-conv">–</div><div class="d">Cadastros ÷ visitas</div></div>
+    <div class="kpi"><div class="l">Clicaram em baixar</div><div class="n" id="k-cliques">–</div><div class="d">Pessoas que tocaram no botão</div></div>
+    <div class="kpi"><div class="l">Downloads confirmados</div><div class="n" id="k-down">–</div><div class="d">Arquivo recebido por inteiro</div></div>
+    <div class="kpi"><div class="l">Aceitaram novidades</div><div class="n" id="k-mk">–</div><div class="d" id="k-mk-p">Consentimento de marketing</div></div>
+  </div>
+
+  <div class="grade2">
+    <div class="painel">
+      <h3>Por dia</h3>
+      <div class="legenda"><span><i style="background:var(--vermelho)"></i>Cadastros</span><span><i style="background:var(--amarelo)"></i>Visitas</span></div>
+      <svg class="graf" id="grafico" role="img" aria-label="Cadastros e visitas por dia"></svg>
+    </div>
+    <div class="painel">
+      <h3>Origem</h3>
+      <div class="rolagem"><table class="t" id="t-origem"><thead><tr><th>Origem</th><th>Visitas</th><th>Cadastros</th></tr></thead><tbody></tbody></table></div>
+      <p class="nota">Vem dos parâmetros <code>utm_source</code> do link ou do site de origem. O Instagram costuma não informar a origem, por isso use o link da bio com UTM.</p>
+    </div>
+  </div>
+
+  <div class="painel" style="margin-top:14px">
+    <h3>Contatos</h3>
+    <div class="filtros">
+      <input type="search" id="busca" placeholder="Buscar por nome ou e-mail">
+      <label><input type="checkbox" id="so-mk"> Só quem autorizou receber novidades</label>
+      <button class="bt" id="csv">Exportar CSV</button>
+    </div>
+    <div class="rolagem">
+      <table class="t" id="t-contatos">
+        <thead><tr><th>Data</th><th>Nome</th><th>E-mail</th><th>Situação</th><th>Origem</th><th>Novidades</th><th>Clicou</th><th>Baixou</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="nota" id="contagem"></p>
+    <p class="nota"><b>Como ler os números:</b> <b>cadastro</b> = a pessoa enviou o formulário. <b>Clicou</b> = tocou em “Baixar meu eBook”. <b>Baixou</b> = o navegador recebeu o arquivo completo. No navegador interno do Instagram, o PDF abre direto no leitor; nesse caso só o clique é registrado. Para usar e-mails em campanhas, exporte <b>apenas</b> quem autorizou novidades.</p>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="cx"><b id="m-tit"></b><p id="m-txt"></p><div style="display:flex; gap:10px; justify-content:flex-end"><button class="bt claro" id="m-nao">Cancelar</button><button class="bt perigo" id="m-sim">Confirmar</button></div></div></div>
+
+<script src="assets/admin.js"></script>
+</body>
+</html>
